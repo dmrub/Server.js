@@ -92,6 +92,25 @@ if (cluster.isMaster) {
     })();
     function respawnPending() { console.log('Respawning already in progress'); }
   });
+
+
+  function killWorkers() {
+    for (var id in cluster.workers)
+      cluster.workers[id].kill('SIGINT');
+  }
+
+  // Terminate gracefully if possible
+  process.on('SIGTERM', function () {
+    console.log('Received SIGTERM signal');
+    console.log('Exiting');
+    killWorkers();
+  });
+
+  process.on('SIGINT', function () {
+    console.log('Received SIGINT signal');
+    console.log('Exiting');
+    killWorkers();
+  });
 }
 // Start up a worker
 else {
