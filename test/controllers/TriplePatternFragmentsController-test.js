@@ -3,7 +3,9 @@ var TriplePatternFragmentsController = require('../../lib/controllers/TriplePatt
 
 var request = require('supertest'),
     DummyServer = require('./DummyServer'),
-    http = require('http');
+    http = require('http'),
+    _ = require('lodash');
+
 
 var TriplePatternFragmentsHtmlView = require('../../lib/views/triplepatternfragments/TriplePatternFragmentsHtmlView.js'),
     TriplePatternFragmentsRdfView  = require('../../lib/views/triplepatternfragments/TriplePatternFragmentsRdfView.js');
@@ -24,7 +26,7 @@ describe('TriplePatternFragmentsController', function () {
   });
 
   describe('A TriplePatternFragmentsController instance with 3 routers', function () {
-    var controller, client, routerA, routerB, routerC, datasource, datasources, view, prefixes;
+    var controller, client, routerA, routerB, routerC, datasource, datasources, view, prefixes, base;
     before(function () {
       routerA = { extractQueryParams: sinon.stub() };
       routerB = { extractQueryParams: sinon.stub().throws(new Error('second router error')) };
@@ -44,6 +46,7 @@ describe('TriplePatternFragmentsController', function () {
       view = new TriplePatternFragmentsRdfView(),
       sinon.spy(view, 'render');
       prefixes = { a: 'a' };
+      base = 'https://example.org/';
       controller = new TriplePatternFragmentsController({
         baseURL: 'https://example.org/base/?bar=foo',
         routers: [routerA, routerB, routerC],
@@ -143,7 +146,7 @@ describe('TriplePatternFragmentsController', function () {
           results: {
             stream: 'items',
           },
-          prefixes: prefixes,
+          prefixes: _.defaults(_.omit(prefixes), { '': base }),
           query: query,
           datasources: datasources,
         });
